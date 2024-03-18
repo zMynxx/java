@@ -1,9 +1,11 @@
-# Create a stage for resolving and downloading dependencies.
-FROM maven:3.8.7-openjdk-18-slim as development
+######################################################
+### Stage 1 - Base image (development environment) ###
+######################################################
+FROM maven:3.8.7-openjdk-18-slim as base 
 
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
-# ARG UID=10001
+ARG UID=10001
 RUN useradd \
   --system \
   --create-home \
@@ -11,15 +13,32 @@ RUN useradd \
   --shell "/bin/bash" \
   --gid root \
   --groups sudo \
-  --uid 1001 \
+  --uid ${UID} \
   developer
 
-# RUN usermod -aG sudo developer && echo "developer ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/developer
-# RUN chmod 0440 /etc/sudoers.d/developer
-#
 USER developer 
+# VOLUME ./.m2 /home/developer/.m2
+# VOLUME ./project /home/developer/project
 WORKDIR /home/developer/project
-# EXPOSE 80
+CMD ["/bin/bash"]
 
-# ENTRYPOINT [ "java", "-jar", "app.jar" ]
-CMD ["bash"]
+###########################################################
+### Stage 2 - Build image (compile, generate artifacts) ###
+###########################################################
+FROM maven:3.8.7-openjdk-18-slim as build 
+WORKDIR /project
+COPY --from=base /project/src/main /project/src/main
+COPY --from=base /project/pom.xml /project/pom.xml
+RUN --mount=type=bind,source=pom.xml,target=pom.xml \
+    --mount=type=cache,target=/root/.m2 \
+    ./mvn package -DskipTests && \
+    mv target/$(./mvnw help:evaluate -Dexpression=project.artifactId -q -DforceStdout)-$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout).jar target/app.jar 
+
+##########################################################
+### Stage 3 - Production image (serve our application) ###
+##########################################################
+FROM scratch as release
+
+# Use COPY to pull artifact from previous build layer
+COPY --from=base /project/target/app.jar app.jar
+ENTRYPOINT ["/bin/java","-jar","app.jar"]

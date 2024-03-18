@@ -10,15 +10,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.jdk
+      target: base
       args:
        - &version JAVA_VERSION=11
       labels:
-       - "com.example.description=This is a development environment for Java applications."
-       - "com.example.department=Development"
-       - "com.example.label-with-empty-value"
+       - "com.zmynxx.description=This is a development environment for Java applications."
+       - "com.zmynxx.department=DevOps"
        - "com.zmynxx.maintainer-email=lior.dux@develeap.com"
+       - "com.zmynxx.repository=https://github.com/zMynxx"
        - "com.zmynxx.maintainer=Lior Dux"
-       - "com.zmynxx.release-date=2021-10-01"
+       - "com.zmynxx.release-date=${date +'%Y-%m-%d'}"
        - "com.zmynxx.version=1.0.0"
       tags:
         # - druxx/maven-jdk:*version
