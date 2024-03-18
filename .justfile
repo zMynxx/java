@@ -19,7 +19,7 @@ default:
 # Run the build command
 build:
     @echo "Building dev-container..."
-    docker compose build
+    docker compose build 
 alias b := build
 
 # Run container interactively
@@ -38,8 +38,20 @@ alias rd := run-detached
 run-shell:
     @echo "Running interactive shell..."
     docker compose up --detach
-    docker compose exec app bash
+    docker compose exec --interactive --tty java-dev /bin/bash
 alias rs := run-shell
+
+# Compile the project
+run-compile:
+  @echo "Running compile..."
+  docker compose exec java-dev /bin/mvn build
+alias rc := run-compile
+
+# Run the test command
+run-test:
+  @echo "Running test..."
+  docker compose exec java-dev /bin/mvn test
+alias rt := run-test
 
 # Restart container
 restart:
@@ -56,4 +68,4 @@ alias down := shut-down
 # Run the clean command
 clean:
     @echo "Cleaning up..."
-    
+    docker compose down --volumes

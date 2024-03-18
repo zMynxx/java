@@ -1,0 +1,25 @@
+# Create a stage for resolving and downloading dependencies.
+FROM maven:3.8.7-openjdk-18-slim as development
+
+# Create a non-privileged user that the app will run under.
+# See https://docs.docker.com/go/dockerfile-user-best-practices/
+# ARG UID=10001
+RUN useradd \
+  --system \
+  --create-home \
+  --home-dir "/home/developer" \
+  --shell "/bin/bash" \
+  --gid root \
+  --groups sudo \
+  --uid 1001 \
+  developer
+
+# RUN usermod -aG sudo developer && echo "developer ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/developer
+# RUN chmod 0440 /etc/sudoers.d/developer
+#
+USER developer 
+WORKDIR /home/developer/project
+# EXPOSE 80
+
+# ENTRYPOINT [ "java", "-jar", "app.jar" ]
+CMD ["bash"]
