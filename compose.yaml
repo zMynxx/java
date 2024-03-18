@@ -12,18 +12,21 @@ services:
       dockerfile: Dockerfile.jdk
       target: base
       args:
-       - &version JAVA_VERSION=11
+        JAVA_VERSION: &version 11
+        DATE: &date $(date +'%Y-%m-%d')
       labels:
-       - "com.zmynxx.description=This is a development environment for Java applications."
-       - "com.zmynxx.department=DevOps"
-       - "com.zmynxx.maintainer-email=lior.dux@develeap.com"
-       - "com.zmynxx.repository=https://github.com/zMynxx"
-       - "com.zmynxx.maintainer=Lior Dux"
-       - "com.zmynxx.release-date=${date +'%Y-%m-%d'}"
-       - "com.zmynxx.version=1.0.0"
+        com.zmynxx.description: "This is a development environment for Java applications."
+        com.zmynxx.department: "DevOps"
+        com.zmynxx.maintainer-email: "lior.dux@develeap.com"
+        com.zmynxx.repository: "https://github.com/zMynxx"
+        com.zmynxx.maintainer: "Lior Dux"
+        com.zmynxx.release-date: *date
+        com.zmynxx.version: "1.0.0"
+        com.zmynxx.java.version: *version
       tags:
-        # - druxx/maven-jdk:*version
         - druxx/maven-jdk:latest
+    environment:
+      - TZ=Asia/Jerusalem
     tty: true
     stdin_open: true
     working_dir: /home/developer/project
