@@ -26,6 +26,7 @@
 
   <!---
     Repositories: used to define the repositories where the dependencies are located.
+    Pull external dependencies.
   -->
   <repositories>
     <repository>
